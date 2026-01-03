@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { FavoritesProvider } from '@/components/FavoritesContext';
 
 export const metadata: Metadata = {
   title: 'Restaurant Finder',
@@ -12,8 +13,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className="font-sans antialiased">
+        <FavoritesProvider>
+          {children}
+        </FavoritesProvider>
+      </body>
     </html>
   );
 }

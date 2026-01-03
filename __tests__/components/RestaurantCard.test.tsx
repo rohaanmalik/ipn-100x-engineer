@@ -1,16 +1,10 @@
 /**
- * TODO: Workshop Exercise 4 - Add unit tests
- *
- * This test file is a skeleton for RestaurantCard component tests.
- * Add meaningful tests for:
- * - Rendering restaurant information
- * - Star rating display
- * - Price range display
- * - Button functionality
+ * RestaurantCard component tests
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import RestaurantCard from '@/components/RestaurantCard';
+import { FavoritesProvider } from '@/components/FavoritesContext';
 import { Restaurant } from '@/types/restaurant';
 
 const mockRestaurant: Restaurant = {
@@ -28,26 +22,61 @@ const mockRestaurant: Restaurant = {
   description: 'A test restaurant for unit testing',
 };
 
+// Wrapper component that provides FavoritesContext
+const renderWithFavorites = (ui: React.ReactElement) => {
+  return render(<FavoritesProvider>{ui}</FavoritesProvider>);
+};
+
 describe('RestaurantCard', () => {
   it('renders restaurant name', () => {
-    render(<RestaurantCard restaurant={mockRestaurant} />);
+    renderWithFavorites(<RestaurantCard restaurant={mockRestaurant} />);
     expect(screen.getByText('Test Restaurant')).toBeInTheDocument();
   });
 
   it('displays the cuisine type', () => {
-    render(<RestaurantCard restaurant={mockRestaurant} />);
+    renderWithFavorites(<RestaurantCard restaurant={mockRestaurant} />);
     expect(screen.getByText('Italian')).toBeInTheDocument();
   });
 
   it('shows the rating', () => {
-    render(<RestaurantCard restaurant={mockRestaurant} />);
+    renderWithFavorites(<RestaurantCard restaurant={mockRestaurant} />);
     expect(screen.getByText('4.5')).toBeInTheDocument();
   });
 
-  // TODO: Add more tests
-  // - Test price range display and colors
-  // - Test star rendering for different ratings
-  // - Test address truncation
-  // - Test View Details button
-  // - Test phone button
+  it('displays the price range', () => {
+    renderWithFavorites(<RestaurantCard restaurant={mockRestaurant} />);
+    expect(screen.getByText('$$')).toBeInTheDocument();
+  });
+
+  it('shows restaurant address', () => {
+    renderWithFavorites(<RestaurantCard restaurant={mockRestaurant} />);
+    expect(screen.getByText(mockRestaurant.address)).toBeInTheDocument();
+  });
+
+  it('displays opening hours', () => {
+    renderWithFavorites(<RestaurantCard restaurant={mockRestaurant} />);
+    expect(screen.getByText(/11:00 AM/)).toBeInTheDocument();
+    expect(screen.getByText(/10:00 PM/)).toBeInTheDocument();
+  });
+
+  it('has a favorite button that can be toggled', () => {
+    renderWithFavorites(<RestaurantCard restaurant={mockRestaurant} />);
+    const favoriteButton = screen.getByTitle('Add to favorites');
+    expect(favoriteButton).toBeInTheDocument();
+
+    fireEvent.click(favoriteButton);
+    expect(screen.getByTitle('Remove from favorites')).toBeInTheDocument();
+  });
+
+  it('has a View Details button', () => {
+    renderWithFavorites(<RestaurantCard restaurant={mockRestaurant} />);
+    expect(screen.getByRole('button', { name: /view details/i })).toBeInTheDocument();
+  });
+
+  it('has a phone link', () => {
+    renderWithFavorites(<RestaurantCard restaurant={mockRestaurant} />);
+    const phoneLink = screen.getByTitle(`Call ${mockRestaurant.phone}`);
+    expect(phoneLink).toBeInTheDocument();
+    expect(phoneLink).toHaveAttribute('href', `tel:${mockRestaurant.phone}`);
+  });
 });
